@@ -5,18 +5,16 @@ from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
-
-# Load MNIST
 mnist = fetch_openml("mnist_784", version=1, as_frame=False)
 X = mnist.data
 y = mnist.target.astype(int)
 
-# Filter for digits 0 and 1 only
+
 filter_idx = np.where((y == 0) | (y == 1))
 X = X[filter_idx]
 y = y[filter_idx]
 
-# Show sample images of only digits 0 and 1
+
 plt.figure(figsize=(5,5))
 for i in range(9):
     idx = np.random.randint(0, len(X))
@@ -28,22 +26,22 @@ for i in range(9):
 plt.tight_layout()
 plt.show()
 
-# Normalize
+
 X = X / 255.0
 
-# Train-val-test split
+
 X_train, X_temp, y_train, y_temp = train_test_split(X, y, test_size=0.3, random_state=42)
 X_val, X_test, y_val, y_test = train_test_split(X_temp, y_temp, test_size=0.5, random_state=42)
 
-# Logistic Regression Model
+
 model = LogisticRegression(max_iter=1000)
 model.fit(X_train, y_train)
 
-# Prediction
+
 y_pred = model.predict(X_test)
 print("Accuracy:", accuracy_score(y_test, y_pred))
 
-# Confusion Matrix
+
 cm = confusion_matrix(y_test, y_pred)
 plt.figure(figsize=(6,5))
 sns.heatmap(cm, annot=True, fmt='d', cmap='Blues')
@@ -52,7 +50,6 @@ plt.ylabel("Actual")
 plt.title("Confusion Matrix (Digits 0 vs 1)")
 plt.show()
 
-# Show some misclassified samples
 misclassified = np.where(y_pred != y_test)[0]
 print("Misclassified samples:", len(misclassified))
 
