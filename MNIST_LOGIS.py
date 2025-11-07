@@ -6,49 +6,63 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
 
+# Load MNIST
 mnist = fetch_openml("mnist_784", version=1, as_frame=False)
 X = mnist.data
 y = mnist.target.astype(int)
 
+# Filter for digits 0 and 1 only
+filter_idx = np.where((y == 0) | (y == 1))
+X = X[filter_idx]
+y = y[filter_idx]
+
+# Show sample images of only digits 0 and 1
 plt.figure(figsize=(5,5))
 for i in range(9):
     idx = np.random.randint(0, len(X))
     img = X[idx].reshape(28,28)
     plt.subplot(3,3,i+1)
     plt.imshow(img, cmap="gray")
-    plt.title(y[idx])
+    plt.title(f"Label: {y[idx]}")
     plt.axis("off")
+plt.tight_layout()
 plt.show()
 
+# Normalize
 X = X / 255.0
 
+# Train-val-test split
 X_train, X_temp, y_train, y_temp = train_test_split(X, y, test_size=0.3, random_state=42)
 X_val, X_test, y_val, y_test = train_test_split(X_temp, y_temp, test_size=0.5, random_state=42)
 
+# Logistic Regression Model
 model = LogisticRegression(max_iter=1000)
 model.fit(X_train, y_train)
 
+# Prediction
 y_pred = model.predict(X_test)
-print(accuracy_score(y_test, y_pred))
+print("Accuracy:", accuracy_score(y_test, y_pred))
 
+# Confusion Matrix
 cm = confusion_matrix(y_test, y_pred)
-print(cm)
-
 plt.figure(figsize=(6,5))
-sns.heatmap(cm, annot=True, fmt='d', cmap='gray')
+sns.heatmap(cm, annot=True, fmt='d', cmap='Blues')
 plt.xlabel("Predicted")
 plt.ylabel("Actual")
+plt.title("Confusion Matrix (Digits 0 vs 1)")
 plt.show()
 
+# Show some misclassified samples
 misclassified = np.where(y_pred != y_test)[0]
-print(len(misclassified))
+print("Misclassified samples:", len(misclassified))
 
 plt.figure(figsize=(6,6))
-for i in range(9):
+for i in range(min(9, len(misclassified))):
     idx = misclassified[i]
     img = X_test[idx].reshape(28,28)
     plt.subplot(3,3,i+1)
     plt.imshow(img, cmap="gray")
-    plt.title(f"{y_test[idx]} vs {y_pred[idx]}")
+    plt.title(f"True: {y_test[idx]}, Pred: {y_pred[idx]}")
     plt.axis("off")
+plt.tight_layout()
 plt.show()
